@@ -376,7 +376,7 @@ tmp/
 *.pfx
 
 # Archivos de configuración de servidor
-nginx.conf
+#nginx.conf
 apache.conf
 *.conf
 

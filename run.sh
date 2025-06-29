@@ -12,6 +12,50 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Función para mostrar ayuda
+show_help() {
+    echo -e "${BLUE}Uso: $0 [OPCIÓN]${NC}"
+    echo ""
+    echo "Opciones:"
+    echo "  --build    Reconstruir la imagen Docker"
+    echo "  --stop     Detener el contenedor"
+    echo "  --logs     Mostrar logs del contenedor"
+    echo "  --help     Mostrar esta ayuda"
+    echo ""
+    echo "Sin opciones: Iniciar la aplicación"
+}
+
+# Procesar argumentos
+BUILD=false
+STOP=false
+LOGS=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --build)
+            BUILD=true
+            shift
+            ;;
+        --stop)
+            STOP=true
+            shift
+            ;;
+        --logs)
+            LOGS=true
+            shift
+            ;;
+        --help)
+            show_help
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Opción desconocida: $1${NC}"
+            show_help
+            exit 1
+            ;;
+    esac
+done
+
 echo -e "${BLUE}=== Aplicación de Astrología con HTTPS ===${NC}"
 
 # Verificar si Docker está instalado
@@ -20,8 +64,24 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
+# Función para detener contenedor
+if [ "$STOP" = true ]; then
+    echo -e "${YELLOW}Deteniendo contenedor...${NC}"
+    docker stop astrology-app 2>/dev/null || true
+    docker rm astrology-app 2>/dev/null || true
+    echo -e "${GREEN}Contenedor detenido.${NC}"
+    exit 0
+fi
+
+# Función para mostrar logs
+if [ "$LOGS" = true ]; then
+    echo -e "${BLUE}Mostrando logs del contenedor...${NC}"
+    docker logs -f astrology-app
+    exit 0
+fi
+
 # Verificar si la imagen existe, si no, construirla
-if [[ "$(docker images -q astrology-app 2> /dev/null)" == "" ]]; then
+if [[ "$(docker images -q astrology-app 2> /dev/null)" == "" ]] || [ "$BUILD" = true ]; then
     echo -e "${YELLOW}Construyendo imagen Docker...${NC}"
     docker build -t astrology-app .
 fi
@@ -62,9 +122,11 @@ if curl -f -k https://localhost/health &> /dev/null; then
     echo -e ""
     echo -e "${BLUE}Para detener la aplicación:${NC}"
     echo -e "   docker stop astrology-app"
+    echo -e "   o ejecutar: $0 --stop"
     echo -e ""
     echo -e "${BLUE}Para ver los logs:${NC}"
     echo -e "   docker logs -f astrology-app"
+    echo -e "   o ejecutar: $0 --logs"
 else
     echo -e "${RED}❌ Error: La aplicación no se inició correctamente.${NC}"
     echo -e "${YELLOW}Revisando logs...${NC}"

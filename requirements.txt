@@ -1,0 +1,4 @@
+fastapi
+uvicorn[standard]
+pyswisseph
+python-dotenv          # para leer variables de entorno (ruta efemérides)

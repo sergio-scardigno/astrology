@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Carta Astral</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #1e3c72, #2a5298);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+            }
+
+            .form-section {
+                padding: 30px;
+                background: #f8f9fa;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .form-group label {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #333;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+
+            .btn {
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 15px 30px;
+                border: none;
+                border-radius: 8px;
+                font-size: 18px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+
+            .chart-container {
+                padding: 30px;
+                text-align: center;
+            }
+
+            .chart {
+                position: relative;
+                width: 600px;
+                height: 600px;
+                margin: 0 auto;
+                border: 3px solid #333;
+                border-radius: 50%;
+                background: #f8f9fa;
+            }
+
+            .sign {
+                position: absolute;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: white;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            .planet {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: white;
+                font-size: 10px;
+                cursor: pointer;
+                transition: transform 0.2s;
+            }
+
+            .planet:hover {
+                transform: scale(1.2);
+            }
+
+            .house {
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: #333;
+                font-size: 8px;
+                background: #fff;
+                border: 2px solid #333;
+            }
+
+            .fire {
+                background: #ff4757;
+            }
+            .earth {
+                background: #2ed573;
+            }
+            .air {
+                background: #3742fa;
+            }
+            .water {
+                background: #5352ed;
+            }
+
+            .results {
+                padding: 30px;
+                background: white;
+            }
+
+            .planet-info {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .planet-card {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                border-left: 5px solid #667eea;
+            }
+
+            .planet-card h3 {
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .aspects {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .balance-section {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .balance-summary {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                border-left: 5px solid #667eea;
+            }
+
+            .element-bar {
+                display: flex;
+                align-items: center;
+                margin: 10px 0;
+                gap: 10px;
+            }
+
+            .element-name {
+                width: 80px;
+                font-weight: bold;
+            }
+
+            .element-progress {
+                flex: 1;
+                background: #e9ecef;
+                border-radius: 10px;
+                height: 20px;
+                overflow: hidden;
+            }
+
+            .element-fill {
+                height: 100%;
+                transition: width 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+            }
+
+            .element-fill.fire {
+                background: #ff4757;
+            }
+            .element-fill.earth {
+                background: #2ed573;
+            }
+            .element-fill.air {
+                background: #3742fa;
+            }
+            .element-fill.water {
+                background: #5352ed;
+            }
+
+            .element-stats {
+                width: 100px;
+                text-align: right;
+                font-weight: bold;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 50px;
+                font-size: 18px;
+                color: #666;
+            }
+
+            .error {
+                background: #ff4757;
+                color: white;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🌟 Carta Astral 🌟</h1>
+                <p>Descubre tu mapa astrológico personal</p>
+            </div>
+
+            <div class="form-section">
+                <form id="birthForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="anio">Año de nacimiento:</label>
+                            <input
+                                type="number"
+                                id="anio"
+                                name="anio"
+                                min="1900"
+                                max="2100"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="mes">Mes:</label>
+                            <select id="mes" name="mes" required>
+                                <option value="">Seleccionar mes</option>
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dia">Día:</label>
+                            <input
+                                type="number"
+                                id="dia"
+                                name="dia"
+                                min="1"
+                                max="31"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="hora">Hora:</label>
+                            <input
+                                type="number"
+                                id="hora"
+                                name="hora"
+                                min="0"
+                                max="23"
+                                value="12"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="minuto">Minuto:</label>
+                            <input
+                                type="number"
+                                id="minuto"
+                                name="minuto"
+                                min="0"
+                                max="59"
+                                value="0"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="tz">Zona horaria:</label>
+                            <input
+                                type="number"
+                                id="tz"
+                                name="tz"
+                                min="-12"
+                                max="12"
+                                value="-3"
+                                step="0.5"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="lat">Latitud:</label>
+                            <input
+                                type="number"
+                                id="lat"
+                                name="lat"
+                                min="-90"
+                                max="90"
+                                step="0.0001"
+                                value="-34.6037"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="lon">Longitud:</label>
+                            <input
+                                type="number"
+                                id="lon"
+                                name="lon"
+                                min="-180"
+                                max="180"
+                                step="0.0001"
+                                value="-58.3816"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">
+                        Generar Carta Astral
+                    </button>
+                </form>
+            </div>
+
+            <div id="loading" class="loading" style="display: none">
+                <p>🔄 Calculando tu carta astral...</p>
+            </div>
+
+            <div id="error" class="error" style="display: none"></div>
+
+            <div id="results" class="results" style="display: none">
+                <div class="chart-container">
+                    <canvas id="chartCanvas" width="600" height="600"></canvas>
+                </div>
+
+                <div class="planet-info" id="planetInfo"></div>
+
+                <div class="aspects">
+                    <h2>Aspectos Planetarios</h2>
+                    <div id="aspectsList"></div>
+                </div>
+
+                <div class="balance-section">
+                    <h2>Balance de Elementos</h2>
+                    <div id="balanceElementos"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const SIGNS = [
+                'Aries',
+                'Tauro',
+                'Géminis',
+                'Cáncer',
+                'Leo',
+                'Virgo',
+                'Libra',
+                'Escorpio',
+                'Sagitario',
+                'Capricornio',
+                'Acuario',
+                'Piscis',
+            ];
+
+            const ELEMENTOS = {
+                Aries: 'fire',
+                Leo: 'fire',
+                Sagitario: 'fire',
+                Tauro: 'earth',
+                Virgo: 'earth',
+                Capricornio: 'earth',
+                Géminis: 'air',
+                Libra: 'air',
+                Acuario: 'air',
+                Cáncer: 'water',
+                Escorpio: 'water',
+                Piscis: 'water',
+            };
+
+            const PLANET_SYMBOLS = {
+                sol: '☉',
+                luna: '☽',
+                mercurio: '☿',
+                venus: '♀',
+                marte: '♂',
+                jupiter: '♃',
+                saturno: '♄',
+                urano: '♅',
+                neptuno: '♆',
+                pluton: '♇',
+            };
+
+            const PLANET_NAMES = {
+                sol: 'Sol',
+                luna: 'Luna',
+                mercurio: 'Mercurio',
+                venus: 'Venus',
+                marte: 'Marte',
+                jupiter: 'Júpiter',
+                saturno: 'Saturno',
+                urano: 'Urano',
+                neptuno: 'Neptuno',
+                pluton: 'Plutón',
+            };
+
+            document
+                .getElementById('birthForm')
+                .addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(e.target);
+                    const params = new URLSearchParams();
+
+                    for (let [key, value] of formData.entries()) {
+                        // Convertir coordenadas de coma a punto decimal
+                        if (key === 'lat' || key === 'lon') {
+                            value = value.replace(',', '.');
+                        }
+                        params.append(key, value);
+                    }
+
+                    showLoading();
+
+                    try {
+                        const response = await fetch(
+                            `http://localhost:8000/carta?${params}`
+                        );
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            displayChart(data);
+                        } else {
+                            showError(
+                                'Error al generar la carta astral: ' +
+                                    data.detail
+                            );
+                        }
+                    } catch (error) {
+                        showError('Error de conexión: ' + error.message);
+                    }
+                });
+
+            function showLoading() {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+            }
+
+            function showError(message) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = message;
+            }
+
+            function displayChart(data) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+
+                if (!data) {
+                    showError('No se recibieron datos de la API');
+                    return;
+                }
+
+                drawChart(data);
+                displayPlanetInfo(data);
+                displayAspects(data.aspects || []);
+                displayBalanceElementos(data.balance_elementos);
+            }
+
+            function drawChart(data) {
+                const canvas = document.getElementById('chartCanvas');
+                const ctx = canvas.getContext('2d');
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+                const radius = 250;
+
+                // Limpiar canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Dibujar círculo exterior
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                // Dibujar signos del zodiaco
+                for (let i = 0; i < 12; i++) {
+                    const angle = ((i * 30 - 90) * Math.PI) / 180;
+                    const x = centerX + (radius - 30) * Math.cos(angle);
+                    const y = centerY + (radius - 30) * Math.sin(angle);
+
+                    ctx.fillStyle = getElementColor(ELEMENTOS[SIGNS[i]]);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 25, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(SIGNS[i], x, y + 4);
+                }
+
+                // Dibujar casas
+                if (data.casas) {
+                    for (let i = 1; i <= 12; i++) {
+                        const casa = data.casas[i];
+                        if (casa) {
+                            const grado = casa.grado;
+                            const angle = ((grado - 90) * Math.PI) / 180;
+                            const x = centerX + (radius - 80) * Math.cos(angle);
+                            const y = centerY + (radius - 80) * Math.sin(angle);
+
+                            ctx.fillStyle = 'white';
+                            ctx.strokeStyle = '#333';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.stroke();
+
+                            ctx.fillStyle = '#333';
+                            ctx.font = '8px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(i, x, y + 3);
+                        }
+                    }
+                }
+
+                // Dibujar planetas
+                if (data.planetas) {
+                    for (let [planeta, info] of Object.entries(data.planetas)) {
+                        if (info && info.grado !== undefined) {
+                            const grado = info.grado;
+                            const angle = ((grado - 90) * Math.PI) / 180;
+                            const x =
+                                centerX + (radius - 120) * Math.cos(angle);
+                            const y =
+                                centerY + (radius - 120) * Math.sin(angle);
+
+                            ctx.fillStyle = getElementColor(
+                                ELEMENTOS[info.signo]
+                            );
+                            ctx.beginPath();
+                            ctx.arc(x, y, 15, 0, 2 * Math.PI);
+                            ctx.fill();
+
+                            ctx.fillStyle = 'white';
+                            ctx.font = '12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(PLANET_SYMBOLS[planeta], x, y + 4);
+                        }
+                    }
+                }
+            }
+
+            function getElementColor(elemento) {
+                const colors = {
+                    fire: '#ff4757',
+                    earth: '#2ed573',
+                    air: '#3742fa',
+                    water: '#5352ed',
+                };
+                return colors[elemento] || '#666';
+            }
+
+            function displayPlanetInfo(data) {
+                const container = document.getElementById('planetInfo');
+                container.innerHTML = '';
+
+                if (!data.planetas) {
+                    container.innerHTML =
+                        '<p>No hay información de planetas disponible.</p>';
+                    return;
+                }
+
+                for (let [planeta, info] of Object.entries(data.planetas)) {
+                    if (info) {
+                        const card = document.createElement('div');
+                        card.className = 'planet-card';
+                        card.innerHTML = `
+                        <h3>${PLANET_NAMES[planeta]} ${
+                            PLANET_SYMBOLS[planeta]
+                        }</h3>
+                        <p><strong>Signo:</strong> ${info.signo || 'N/A'}</p>
+                        <p><strong>Grado:</strong> ${info.grado || 'N/A'}°</p>
+                        <p><strong>Elemento:</strong> ${getElementName(
+                            ELEMENTOS[info.signo]
+                        )}</p>
+                    `;
+                        container.appendChild(card);
+                    }
+                }
+            }
+
+            function getElementName(elemento) {
+                const names = {
+                    fire: 'Fuego',
+                    earth: 'Tierra',
+                    air: 'Aire',
+                    water: 'Agua',
+                };
+                return names[elemento] || elemento;
+            }
+
+            function displayAspects(aspects) {
+                const container = document.getElementById('aspectsList');
+                container.innerHTML = '';
+
+                if (
+                    !aspects ||
+                    !Array.isArray(aspects) ||
+                    aspects.length === 0
+                ) {
+                    container.innerHTML =
+                        '<p>No se encontraron aspectos significativos.</p>';
+                    return;
+                }
+
+                aspects.forEach((aspect) => {
+                    if (aspect && aspect.planeta1 && aspect.planeta2) {
+                        const item = document.createElement('div');
+                        item.className = 'aspect-item';
+                        item.innerHTML = `
+                        <strong>${PLANET_NAMES[aspect.planeta1]} ${
+                            PLANET_SYMBOLS[aspect.planeta1]
+                        } 
+                        ${aspect.aspecto} 
+                        ${PLANET_NAMES[aspect.planeta2]} ${
+                            PLANET_SYMBOLS[aspect.planeta2]
+                        }</strong>
+                        <br>Orbe: ${aspect.orbe}°
+                    `;
+                        container.appendChild(item);
+                    }
+                });
+            }
+
+            function displayBalanceElementos(balance) {
+                const container = document.getElementById('balanceElementos');
+                container.innerHTML = '';
+
+                if (!balance) {
+                    container.innerHTML =
+                        '<p>No hay información de balance disponible.</p>';
+                    return;
+                }
+
+                // Resumen general
+                const summary = document.createElement('div');
+                summary.className = 'balance-summary';
+                summary.innerHTML = `
+                    <h3>${balance.resumen}</h3>
+                    <p><strong>Estado:</strong> ${balance.balance_general}</p>
+                `;
+                container.appendChild(summary);
+
+                // Barras de progreso para cada elemento
+                const elementos = ['Fuego', 'Tierra', 'Aire', 'Agua'];
+                const elementClasses = ['fire', 'earth', 'air', 'water'];
+
+                elementos.forEach((elemento, index) => {
+                    const elementData = balance.elementos[elemento];
+                    if (elementData) {
+                        const barContainer = document.createElement('div');
+                        barContainer.className = 'element-bar';
+
+                        barContainer.innerHTML = `
+                            <div class="element-name">${elemento}</div>
+                            <div class="element-progress">
+                                <div class="element-fill ${elementClasses[index]}" style="width: ${elementData.porcentaje}%">
+                                    ${elementData.cantidad} planetas
+                                </div>
+                            </div>
+                            <div class="element-stats">${elementData.porcentaje}%</div>
+                        `;
+
+                        container.appendChild(barContainer);
+                    }
+                });
+
+                // Interpretación del balance
+                const interpretation = document.createElement('div');
+                interpretation.className = 'balance-summary';
+                interpretation.innerHTML = `
+                    <h4>Interpretación del Balance:</h4>
+                    <p><strong>Elemento Dominante:</strong> ${
+                        balance.dominante
+                    }</p>
+                    <p>${getBalanceInterpretation(balance)}</p>
+                `;
+                container.appendChild(interpretation);
+            }
+
+            function getBalanceInterpretation(balance) {
+                const dominante = balance.dominante;
+                const balanceGeneral = balance.balance_general;
+
+                const interpretations = {
+                    Fuego: {
+                        'Muy Balanceado':
+                            'Tienes una distribución equilibrada de elementos, con una ligera tendencia hacia la acción, pasión y creatividad.',
+                        Balanceado:
+                            'Tu energía está bien distribuida, con un enfoque en la iniciativa y el entusiasmo.',
+                        'Poco Balanceado':
+                            'Tienes una tendencia marcada hacia la acción y la pasión, pero mantienes cierta diversidad.',
+                        Desbalanceado:
+                            'Tu carta está muy enfocada en la energía de fuego, lo que puede indicar mucha pasión y acción.',
+                    },
+                    Tierra: {
+                        'Muy Balanceado':
+                            'Tienes una distribución equilibrada con una ligera tendencia hacia la practicidad y estabilidad.',
+                        Balanceado:
+                            'Tu enfoque está bien distribuido, con tendencia hacia lo material y estructurado.',
+                        'Poco Balanceado':
+                            'Tienes una tendencia marcada hacia la practicidad y la estabilidad.',
+                        Desbalanceado:
+                            'Tu carta está muy enfocada en la energía de tierra, lo que indica mucha practicidad y estructura.',
+                    },
+                    Aire: {
+                        'Muy Balanceado':
+                            'Tienes una distribución equilibrada con una ligera tendencia hacia la comunicación e intelectualidad.',
+                        Balanceado:
+                            'Tu enfoque está bien distribuido, con tendencia hacia lo mental y social.',
+                        'Poco Balanceado':
+                            'Tienes una tendencia marcada hacia la comunicación y el pensamiento.',
+                        Desbalanceado:
+                            'Tu carta está muy enfocada en la energía de aire, lo que indica mucha actividad mental y social.',
+                    },
+                    Agua: {
+                        'Muy Balanceado':
+                            'Tienes una distribución equilibrada con una ligera tendencia hacia la intuición y emocionalidad.',
+                        Balanceado:
+                            'Tu enfoque está bien distribuido, con tendencia hacia lo emocional e intuitivo.',
+                        'Poco Balanceado':
+                            'Tienes una tendencia marcada hacia la intuición y las emociones.',
+                        Desbalanceado:
+                            'Tu carta está muy enfocada en la energía de agua, lo que indica mucha sensibilidad e intuición.',
+                    },
+                };
+
+                return (
+                    interpretations[dominante]?.[balanceGeneral] ||
+                    'Tu carta astral muestra una distribución única de elementos que refleja tu personalidad individual.'
+                );
+            }
+        </script>
+    </body>
+</html>

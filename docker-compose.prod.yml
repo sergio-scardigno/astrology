@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+    astrology:
+        image: ${DOCKER_USERNAME:-tu-usuario-dockerhub}/astrology-api:${VERSION:-latest}
+        container_name: astrology-app
+        restart: unless-stopped
+        ports:
+            - '8000:8000'
+        volumes:
+            - ./ephe:/opt/swisseph/ephe:ro # monta efemérides dentro del contenedor
+            - astrology_logs:/app/logs # logs persistentes
+        environment:
+            - EPH_PATH=/opt/swisseph/ephe
+            - PYTHONPATH=/app
+            - PYTHONUNBUFFERED=1
+            - HOST=0.0.0.0
+            - PORT=8000
+        networks:
+            - astrology-network
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+
+volumes:
+    astrology_logs:
+
+networks:
+    astrology-network:
+        driver: bridge

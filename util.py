@@ -1,6 +1,8 @@
 import os
 import swisseph as swe
 from datetime import datetime, timezone, timedelta
+from timezonefinder import TimezoneFinder
+import pytz
 
 EPH_PATH = os.getenv("EPH_PATH", "./ephe")
 swe.set_ephe_path(EPH_PATH)
@@ -164,4 +166,24 @@ def get_chart(y, m, d, h=12, mi=0, s=0, tz=0, lat=0.0, lon=0.0):
         "aspectos": aspectos,
         "balance_elementos": balance_elementos
     }
+
+def get_timezone_offset(lat, lon, dt=None):
+    """
+    Dada una latitud, longitud y una fecha (datetime), devuelve el offset horario en horas.
+    Si no se pasa fecha, usa la fecha y hora actual.
+    """
+    tf = TimezoneFinder()
+    timezone_str = tf.timezone_at(lng=lon, lat=lat)
+    if not timezone_str:
+        return None
+    tz = pytz.timezone(timezone_str)
+    if dt is None:
+        dt = datetime.utcnow()
+    # Hacer que dt sea 'aware' en la zona horaria local
+    if dt.tzinfo is None:
+        dt = tz.localize(dt, is_dst=None)
+    offset = dt.utcoffset()
+    if offset is None:
+        return None
+    return offset.total_seconds() / 3600
 

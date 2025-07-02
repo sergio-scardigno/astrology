@@ -1,73 +1,55 @@
-# ────────────────────────── Dockerfile para Producción con HTTPS ──────────────────────────
-FROM python:3.12-slim
+# Usar Python 3.11 slim como imagen base
+FROM python:3.11-slim
 
-# Crear usuario no-root para seguridad
-RUN groupadd -r astrology && useradd -r -g astrology astrology
+# Establecer variables de entorno
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV EPH_PATH=/app/ephe
 
-# Instalar dependencias del sistema incluyendo nginx y openssl
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        gcc \
-        g++ \
-        pkg-config \
-        curl \
-        nginx \
-        openssl \
-        supervisor \
+# Instalar dependencias del sistema necesarias para Swiss Ephemeris
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Establecer directorio de trabajo
+# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar requirements primero para aprovechar cache de Docker
+# Copiar archivos de dependencias primero (para aprovechar la caché de Docker)
 COPY requirements.txt .
 
 # Instalar dependencias de Python
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copiar código de la aplicación
-COPY . .
+# Copiar el código de la aplicación
+COPY main.py .
+COPY util.py .
+COPY geocoding.py .
+COPY index.html .
 
-# Crear directorio para efemérides y cambiar permisos
-RUN mkdir -p /opt/swisseph/ephe && \
-    chown -R astrology:astrology /app /opt/swisseph
+# Copiar archivos de efemérides (necesarios para Swiss Ephemeris)
+COPY ephe/ ./ephe/
 
-# Crear directorios para nginx y SSL
-RUN mkdir -p /etc/nginx/ssl /var/log/nginx /var/cache/nginx && \
-    chown -R astrology:astrology /etc/nginx /var/log/nginx /var/cache/nginx
+# Crear usuario no-root para seguridad
+RUN useradd --create-home --shell /bin/bash app && \
+    chown -R app:app /app
 
-# Generar certificado SSL auto-firmado
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/nginx.key \
-    -out /etc/nginx/ssl/nginx.crt \
-    -subj "/C=ES/ST=Madrid/L=Madrid/O=Astrology/OU=IT/CN=localhost" && \
-    chown astrology:astrology /etc/nginx/ssl/*
+# Crear directorio de datos para la caché y dar permisos al nuevo usuario
+RUN mkdir /app/data && \
+    chown -R app:app /app/data
 
-# Copiar configuración de nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+USER app
 
-# Cambiar al usuario no-root
-USER astrology
+# Exponer puerto
+EXPOSE 8000
 
-# Variables de entorno
-ENV EPH_PATH=/opt/swisseph/ephe
-ENV PYTHONPATH=/app
-ENV PYTHONUNBUFFERED=1
-ENV HOST=0.0.0.0
-ENV PORT=8000
-
-# Exponer puertos HTTP y HTTPS
-EXPOSE 80 443 8000
-
-# Health check mejorado
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Comando para ejecutar con supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
-
+# Comando para ejecutar la aplicación
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 

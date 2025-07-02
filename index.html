@@ -24,7 +24,7 @@
                 background: white;
                 border-radius: 15px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                overflow: hidden;
+                overflow-x: auto;
             }
 
             .header {
@@ -74,6 +74,79 @@
             .form-group select:focus {
                 outline: none;
                 border-color: #667eea;
+            }
+
+            .city-search-container {
+                grid-column: span 2;
+                position: relative;
+            }
+
+            .city-search-input {
+                width: 100%;
+                padding: 10px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                font-size: 16px;
+            }
+
+            .city-search-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 2px solid #ddd;
+                border-top: none;
+                border-radius: 0 0 8px 8px;
+                max-height: 200px;
+                overflow-y: auto;
+                z-index: 1000;
+                display: none;
+            }
+
+            .city-result {
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+                transition: background-color 0.2s;
+            }
+
+            .city-result:hover {
+                background-color: #f8f9fa;
+            }
+
+            .city-result:last-child {
+                border-bottom: none;
+            }
+
+            .city-name {
+                font-weight: bold;
+                color: #333;
+            }
+
+            .city-details {
+                font-size: 12px;
+                color: #666;
+                margin-top: 2px;
+            }
+
+            .selected-city {
+                background: #e3f2fd;
+                padding: 10px;
+                border-radius: 8px;
+                margin-top: 10px;
+                border-left: 4px solid #667eea;
+            }
+
+            .selected-city-info {
+                font-weight: bold;
+                color: #333;
+            }
+
+            .selected-city-coords {
+                font-size: 12px;
+                color: #666;
+                margin-top: 5px;
             }
 
             .btn {
@@ -277,9 +350,103 @@
                 border-radius: 8px;
                 margin: 20px 0;
             }
+
+            .location-info {
+                background: #e8f5e8;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #2ed573;
+            }
+
+            .positions-section {
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .astro-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+            .astro-table th,
+            .astro-table td {
+                border: 1px solid #bbb;
+                padding: 6px 10px;
+                text-align: center;
+            }
+            .astro-table th {
+                background: #f3f3f3;
+                font-weight: bold;
+            }
+            .astro-table tbody tr:nth-child(even) {
+                background: #fafafa;
+            }
+
+            /* Estilos para Responsive Design */
+            @media (max-width: 768px) {
+                body {
+                    padding: 10px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 2em;
+                }
+
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .city-search-container {
+                    grid-column: span 1;
+                }
+
+                .form-section,
+                .results {
+                    padding: 20px;
+                }
+
+                .chart-container {
+                    padding: 10px 0;
+                }
+
+                #chartCanvas {
+                    width: 100%;
+                    height: auto;
+                }
+
+                .planet-info {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .header h1 {
+                    font-size: 1.8em;
+                }
+
+                .form-section,
+                .results {
+                    padding: 15px;
+                }
+
+                .btn {
+                    padding: 12px 20px;
+                    font-size: 16px;
+                }
+            }
         </style>
     </head>
     <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
         <div class="container">
             <div class="header">
                 <h1>🌟 Carta Astral 🌟</h1>
@@ -331,15 +498,36 @@
                         </div>
                         <div class="form-group">
                             <label for="hora">Hora:</label>
-                            <input
-                                type="number"
-                                id="hora"
-                                name="hora"
-                                min="0"
-                                max="23"
-                                value="12"
-                                required
-                            />
+                            <div style="display: flex; gap: 10px">
+                                <select
+                                    id="hora"
+                                    name="hora"
+                                    required
+                                    style="width: 100%"
+                                >
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12" selected>12</option>
+                                </select>
+                                <select
+                                    id="ampm"
+                                    name="ampm"
+                                    required
+                                    style="width: 100%"
+                                >
+                                    <option value="am">AM</option>
+                                    <option value="pm">PM</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="minuto">Minuto:</label>
@@ -356,40 +544,65 @@
                         <div class="form-group">
                             <label for="tz">Zona horaria:</label>
                             <input
-                                type="number"
+                                type="text"
                                 id="tz"
                                 name="tz"
-                                min="-12"
-                                max="12"
-                                value="-3"
-                                step="0.5"
-                                required
+                                value=""
+                                readonly
+                                style="
+                                    background: #f3f3f3;
+                                    color: #333;
+                                    font-weight: bold;
+                                    cursor: not-allowed;
+                                "
                             />
+                        </div>
+                        <div class="form-group city-search-container">
+                            <label for="citySearch"
+                                >Ciudad de nacimiento (o ingrese
+                                coordenadas):</label
+                            >
+                            <input
+                                type="text"
+                                id="citySearch"
+                                placeholder="Busca tu ciudad (ej: Madrid, Buenos Aires)"
+                                class="city-search-input"
+                            />
+                            <div
+                                id="citySearchResults"
+                                class="city-search-results"
+                            ></div>
+                            <div
+                                id="selectedCity"
+                                class="selected-city"
+                                style="display: none"
+                            >
+                                <div
+                                    class="selected-city-info"
+                                    id="selectedCityInfo"
+                                ></div>
+                                <div
+                                    class="selected-city-coords"
+                                    id="selectedCityCoords"
+                                ></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="lat">Latitud:</label>
                             <input
-                                type="number"
+                                type="text"
                                 id="lat"
                                 name="lat"
-                                min="-90"
-                                max="90"
-                                step="0.0001"
-                                value="-34.6037"
-                                required
+                                placeholder="Ej: 40.4168"
                             />
                         </div>
                         <div class="form-group">
                             <label for="lon">Longitud:</label>
                             <input
-                                type="number"
+                                type="text"
                                 id="lon"
                                 name="lon"
-                                min="-180"
-                                max="180"
-                                step="0.0001"
-                                value="-58.3816"
-                                required
+                                placeholder="Ej: -3.7038"
                             />
                         </div>
                     </div>
@@ -406,8 +619,33 @@
             <div id="error" class="error" style="display: none"></div>
 
             <div id="results" class="results" style="display: none">
+                <button
+                    id="downloadPdfBtn"
+                    class="btn"
+                    style="margin-bottom: 20px"
+                >
+                    Descargar como PDF
+                </button>
+                <div
+                    id="locationInfo"
+                    class="location-info"
+                    style="display: none"
+                >
+                    <strong>📍 Ubicación:</strong>
+                    <span id="locationText"></span>
+                </div>
+
                 <div class="chart-container">
                     <canvas id="chartCanvas" width="600" height="600"></canvas>
+                </div>
+
+                <div class="positions-section">
+                    <h2>Posiciones Planetarias</h2>
+                    <div id="planetPositions"></div>
+                    <h2>Cúspides de Casas</h2>
+                    <div id="houseCusps"></div>
+                    <h2>Aspectos</h2>
+                    <div id="aspectsTable"></div>
                 </div>
 
                 <div class="planet-info" id="planetInfo"></div>
@@ -481,6 +719,131 @@
                 pluton: 'Plutón',
             };
 
+            const SIGN_SYMBOLS = {
+                Aries: '♈',
+                Tauro: '♉',
+                Géminis: '♊',
+                Cáncer: '♋',
+                Leo: '♌',
+                Virgo: '♍',
+                Libra: '♎',
+                Escorpio: '♏',
+                Sagitario: '♐',
+                Capricornio: '♑',
+                Acuario: '♒',
+                Piscis: '♓',
+            };
+
+            let selectedCity = null;
+            let searchTimeout = null;
+
+            // Búsqueda de ciudades
+            document
+                .getElementById('citySearch')
+                .addEventListener('input', function (e) {
+                    const query = e.target.value.trim();
+
+                    if (searchTimeout) {
+                        clearTimeout(searchTimeout);
+                    }
+
+                    if (query.length < 2) {
+                        hideCityResults();
+                        return;
+                    }
+
+                    searchTimeout = setTimeout(() => {
+                        searchCities(query);
+                    }, 300);
+                });
+
+            // Ocultar resultados al hacer clic fuera
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.city-search-container')) {
+                    hideCityResults();
+                }
+            });
+
+            async function searchCities(query) {
+                try {
+                    const response = await fetch(
+                        `/buscar_ciudades?q=${encodeURIComponent(query)}`
+                    );
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        displayCityResults(data.results);
+                    } else {
+                        console.error('Error buscando ciudades:', data);
+                    }
+                } catch (error) {
+                    console.error('Error de conexión:', error);
+                }
+            }
+
+            function displayCityResults(cities) {
+                const resultsContainer =
+                    document.getElementById('citySearchResults');
+                resultsContainer.innerHTML = '';
+
+                if (cities.length === 0) {
+                    resultsContainer.innerHTML =
+                        '<div class="city-result">No se encontraron ciudades</div>';
+                } else {
+                    cities.forEach((city) => {
+                        const cityElement = document.createElement('div');
+                        cityElement.className = 'city-result';
+                        cityElement.innerHTML = `
+                            <div class="city-name">${
+                                city.city || city.name
+                            }</div>
+                            <div class="city-details">${
+                                city.state ? city.state + ', ' : ''
+                            }${city.country}</div>
+                        `;
+                        cityElement.addEventListener('click', () =>
+                            selectCity(city)
+                        );
+                        resultsContainer.appendChild(cityElement);
+                    });
+                }
+
+                resultsContainer.style.display = 'block';
+            }
+
+            function selectCity(city) {
+                selectedCity = city;
+
+                const selectedCityDiv = document.getElementById('selectedCity');
+                const selectedCityInfo =
+                    document.getElementById('selectedCityInfo');
+                const selectedCityCoords =
+                    document.getElementById('selectedCityCoords');
+
+                selectedCityInfo.textContent = `${city.city || city.name}, ${
+                    city.state ? city.state + ', ' : ''
+                }${city.country}`;
+                selectedCityCoords.textContent = `Lat: ${city.lat.toFixed(
+                    4
+                )}, Lon: ${city.lon.toFixed(4)}`;
+
+                // Rellenar campos de lat y lon
+                document.getElementById('lat').value = city.lat.toFixed(4);
+                document.getElementById('lon').value = city.lon.toFixed(4);
+
+                selectedCityDiv.style.display = 'block';
+                hideCityResults();
+
+                // Limpiar el campo de búsqueda
+                document.getElementById('citySearch').value =
+                    city.city || city.name;
+            }
+
+            function hideCityResults() {
+                document.getElementById('citySearchResults').style.display =
+                    'none';
+            }
+
             document
                 .getElementById('birthForm')
                 .addEventListener('submit', async (e) => {
@@ -489,20 +852,46 @@
                     const formData = new FormData(e.target);
                     const params = new URLSearchParams();
 
-                    for (let [key, value] of formData.entries()) {
-                        // Convertir coordenadas de coma a punto decimal
-                        if (key === 'lat' || key === 'lon') {
-                            value = value.replace(',', '.');
+                    let hora = parseInt(formData.get('hora'), 10);
+                    const ampm = formData.get('ampm');
+
+                    if (ampm === 'pm' && hora < 12) {
+                        hora += 12;
+                    }
+                    if (ampm === 'am' && hora === 12) {
+                        // Medianoche
+                        hora = 0;
+                    }
+
+                    params.append('anio', formData.get('anio'));
+                    params.append('mes', formData.get('mes'));
+                    params.append('dia', formData.get('dia'));
+                    params.append('hora', hora);
+                    params.append('minuto', formData.get('minuto'));
+
+                    // Agregar ciudad si está seleccionada
+                    if (selectedCity) {
+                        params.append(
+                            'ciudad',
+                            selectedCity.city || selectedCity.name
+                        );
+                        if (selectedCity.country) {
+                            params.append('pais', selectedCity.country);
                         }
-                        params.append(key, value);
+                    } else {
+                        // O usar lat/lon si se ingresaron manualmente
+                        const lat = document.getElementById('lat').value;
+                        const lon = document.getElementById('lon').value;
+                        if (lat && lon) {
+                            params.append('lat', lat);
+                            params.append('lon', lon);
+                        }
                     }
 
                     showLoading();
 
                     try {
-                        const response = await fetch(
-                            `http://localhost:8000/carta?${params}`
-                        );
+                        const response = await fetch(`/carta?${params}`);
                         const data = await response.json();
 
                         if (response.ok) {
@@ -510,7 +899,9 @@
                         } else {
                             showError(
                                 'Error al generar la carta astral: ' +
-                                    data.detail
+                                    (data.error ||
+                                        data.detail ||
+                                        'Error desconocido')
                             );
                         }
                     } catch (error) {
@@ -539,11 +930,77 @@
                     return;
                 }
 
+                // Mostrar información de ubicación si está disponible
+                if (data.ubicacion) {
+                    const locationInfo =
+                        document.getElementById('locationInfo');
+                    const locationText =
+                        document.getElementById('locationText');
+
+                    if (data.ubicacion.ciudad) {
+                        locationText.textContent = `${data.ubicacion.ciudad}, ${data.ubicacion.pais}`;
+                        locationInfo.style.display = 'block';
+                    } else {
+                        locationInfo.style.display = 'none';
+                    }
+                }
+
+                // Mostrar zona horaria si está disponible
+                if (typeof data.zona_horaria !== 'undefined') {
+                    document.getElementById('tz').value =
+                        data.zona_horaria + ' (UTC)';
+                }
+
                 drawChart(data);
                 displayPlanetInfo(data);
+                displayPlanetPositions(data);
+                displayHouseCusps(data);
+                displayAspectsTable(data);
                 displayAspects(data.aspects || []);
                 displayBalanceElementos(data.balance_elementos);
             }
+
+            document
+                .getElementById('downloadPdfBtn')
+                .addEventListener('click', () => {
+                    const { jsPDF } = window.jspdf;
+                    const resultsElement = document.getElementById('results');
+
+                    // Ocultar el botón de descarga para que no aparezca en el PDF
+                    const downloadBtn =
+                        document.getElementById('downloadPdfBtn');
+                    downloadBtn.style.display = 'none';
+
+                    html2canvas(resultsElement, {
+                        scale: 2, // Aumentar la escala para mejor calidad de imagen
+                        useCORS: true,
+                    })
+                        .then((canvas) => {
+                            const imgData = canvas.toDataURL('image/png');
+                            const pdf = new jsPDF({
+                                orientation: 'p',
+                                unit: 'px',
+                                format: [canvas.width, canvas.height],
+                            });
+                            pdf.addImage(
+                                imgData,
+                                'PNG',
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            pdf.save('carta-astral.pdf');
+
+                            // Volver a mostrar el botón de descarga
+                            downloadBtn.style.display = 'block';
+                        })
+                        .catch((err) => {
+                            console.error('Error al generar el PDF:', err);
+                            // Asegurarse de que el botón vuelva a aparecer si hay un error
+                            downloadBtn.style.display = 'block';
+                        });
+                });
 
             function drawChart(data) {
                 const canvas = document.getElementById('chartCanvas');
@@ -551,84 +1008,147 @@
                 const centerX = canvas.width / 2;
                 const centerY = canvas.height / 2;
                 const radius = 250;
+                const innerRadius = 170; // Radio para el círculo de casas
+                const signRadius = radius - 10; // Radio para los signos
+                const houseLabelRadius = innerRadius - 25; // Radio para etiquetas de casas
+                const planetRadius = innerRadius - 60; // Radio para planetas
 
                 // Limpiar canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // Dibujar círculo exterior
+                // Doble círculo: exterior (signos) e interior (casas)
                 ctx.strokeStyle = '#333';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
                 ctx.stroke();
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+                ctx.stroke();
 
-                // Dibujar signos del zodiaco
+                // Dibujar signos del zodiaco (líneas y símbolos grandes)
                 for (let i = 0; i < 12; i++) {
                     const angle = ((i * 30 - 90) * Math.PI) / 180;
-                    const x = centerX + (radius - 30) * Math.cos(angle);
-                    const y = centerY + (radius - 30) * Math.sin(angle);
-
-                    ctx.fillStyle = getElementColor(ELEMENTOS[SIGNS[i]]);
+                    // Línea divisoria de signos
+                    ctx.strokeStyle = '#bdbdbd';
+                    ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    ctx.arc(x, y, 25, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    ctx.fillStyle = 'white';
-                    ctx.font = '12px Arial';
+                    ctx.moveTo(
+                        centerX + innerRadius * Math.cos(angle),
+                        centerY + innerRadius * Math.sin(angle)
+                    );
+                    ctx.lineTo(
+                        centerX + radius * Math.cos(angle),
+                        centerY + radius * Math.sin(angle)
+                    );
+                    ctx.stroke();
+                    // Símbolo grande del signo
+                    const sign = SIGNS[i];
+                    const signSymbol = SIGN_SYMBOLS[sign] || '';
+                    const x = centerX + signRadius * Math.cos(angle);
+                    const y = centerY + signRadius * Math.sin(angle);
+                    ctx.fillStyle = getElementColor(ELEMENTOS[sign]);
+                    ctx.font = 'bold 32px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(SIGNS[i], x, y + 4);
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(signSymbol, x, y);
                 }
 
-                // Dibujar casas
+                // Dibujar casas (líneas radiales y etiquetas)
                 if (data.casas) {
                     for (let i = 1; i <= 12; i++) {
-                        const casa = data.casas[i];
+                        const casa = data.casas[i.toString()];
                         if (casa) {
                             const grado = casa.grado;
+                            const signo = casa.signo;
+                            const signoSimbolo = SIGN_SYMBOLS[signo] || '';
                             const angle = ((grado - 90) * Math.PI) / 180;
-                            const x = centerX + (radius - 80) * Math.cos(angle);
-                            const y = centerY + (radius - 80) * Math.sin(angle);
-
-                            ctx.fillStyle = 'white';
-                            ctx.strokeStyle = '#333';
-                            ctx.lineWidth = 2;
+                            // Línea radial de casa
+                            ctx.strokeStyle = '#ff9800';
+                            ctx.lineWidth = 2.5;
                             ctx.beginPath();
-                            ctx.arc(x, y, 10, 0, 2 * Math.PI);
-                            ctx.fill();
+                            ctx.moveTo(centerX, centerY);
+                            ctx.lineTo(
+                                centerX + innerRadius * Math.cos(angle),
+                                centerY + innerRadius * Math.sin(angle)
+                            );
                             ctx.stroke();
-
-                            ctx.fillStyle = '#333';
-                            ctx.font = '8px Arial';
+                            // Etiqueta de casa y signo
+                            const labelX =
+                                centerX + houseLabelRadius * Math.cos(angle);
+                            const labelY =
+                                centerY + houseLabelRadius * Math.sin(angle);
+                            ctx.fillStyle = '#ff9800';
+                            ctx.font = 'bold 16px Arial';
                             ctx.textAlign = 'center';
-                            ctx.fillText(i, x, y + 3);
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(
+                                i.toString() + ' ' + signoSimbolo,
+                                labelX,
+                                labelY
+                            );
                         }
                     }
                 }
 
-                // Dibujar planetas
-                if (data.planetas) {
-                    for (let [planeta, info] of Object.entries(data.planetas)) {
-                        if (info && info.grado !== undefined) {
-                            const grado = info.grado;
-                            const angle = ((grado - 90) * Math.PI) / 180;
-                            const x =
-                                centerX + (radius - 120) * Math.cos(angle);
-                            const y =
-                                centerY + (radius - 120) * Math.sin(angle);
-
-                            ctx.fillStyle = getElementColor(
-                                ELEMENTOS[info.signo]
-                            );
+                // Dibujar aspectos planetarios (líneas de colores entre planetas)
+                if (data.aspectos && data.planetas) {
+                    const planetPos = {};
+                    Object.entries(data.planetas).forEach(([planeta, info]) => {
+                        const angle = ((info.grado - 90) * Math.PI) / 180;
+                        planetPos[planeta] = {
+                            x: centerX + planetRadius * Math.cos(angle),
+                            y: centerY + planetRadius * Math.sin(angle),
+                        };
+                    });
+                    data.aspectos.forEach((asp) => {
+                        const p1 = planetPos[asp.planeta1];
+                        const p2 = planetPos[asp.planeta2];
+                        if (p1 && p2) {
+                            // Color según el aspecto
+                            let color = '#2196f3'; // azul por defecto
+                            if (
+                                asp.aspecto
+                                    .toLowerCase()
+                                    .includes('cuadratura') ||
+                                asp.aspecto.toLowerCase().includes('oposición')
+                            )
+                                color = '#e53935'; // rojo
+                            if (asp.aspecto.toLowerCase().includes('trígono'))
+                                color = '#43a047'; // verde
+                            if (asp.aspecto.toLowerCase().includes('sextil'))
+                                color = '#ffb300'; // amarillo
+                            ctx.strokeStyle = color;
+                            ctx.lineWidth = 1.5;
                             ctx.beginPath();
-                            ctx.arc(x, y, 15, 0, 2 * Math.PI);
-                            ctx.fill();
-
-                            ctx.fillStyle = 'white';
-                            ctx.font = '12px Arial';
-                            ctx.textAlign = 'center';
-                            ctx.fillText(PLANET_SYMBOLS[planeta], x, y + 4);
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.stroke();
                         }
-                    }
+                    });
+                }
+
+                // Dibujar planetas (símbolos grandes y claros)
+                if (data.planetas) {
+                    Object.entries(data.planetas).forEach(([planeta, info]) => {
+                        const grado = info.grado;
+                        const angle = ((grado - 90) * Math.PI) / 180;
+                        const x = centerX + planetRadius * Math.cos(angle);
+                        const y = centerY + planetRadius * Math.sin(angle);
+                        ctx.fillStyle = getElementColor(ELEMENTOS[info.signo]);
+                        ctx.beginPath();
+                        ctx.arc(x, y, 20, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.strokeStyle = '#fff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 22px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(PLANET_SYMBOLS[planeta], x, y);
+                    });
                 }
             }
 
@@ -638,68 +1158,160 @@
                     earth: '#2ed573',
                     air: '#3742fa',
                     water: '#5352ed',
+                    fuego: '#ff4757',
+                    tierra: '#2ed573',
+                    aire: '#3742fa',
+                    agua: '#5352ed',
                 };
                 return colors[elemento] || '#666';
+            }
+
+            function getElementClass(elemento) {
+                const classes = {
+                    fire: 'fire',
+                    earth: 'earth',
+                    air: 'air',
+                    water: 'water',
+                    fuego: 'fire',
+                    tierra: 'earth',
+                    aire: 'air',
+                    agua: 'water',
+                };
+                return classes[elemento] || 'fire';
             }
 
             function displayPlanetInfo(data) {
                 const container = document.getElementById('planetInfo');
                 container.innerHTML = '';
 
-                if (!data.planetas) {
-                    container.innerHTML =
-                        '<p>No hay información de planetas disponible.</p>';
-                    return;
-                }
-
-                for (let [planeta, info] of Object.entries(data.planetas)) {
-                    if (info) {
+                if (data.planetas) {
+                    Object.entries(data.planetas).forEach(([planeta, info]) => {
                         const card = document.createElement('div');
                         card.className = 'planet-card';
                         card.innerHTML = `
-                        <h3>${PLANET_NAMES[planeta]} ${
+                            <h3>${PLANET_NAMES[planeta]} ${
                             PLANET_SYMBOLS[planeta]
                         }</h3>
-                        <p><strong>Signo:</strong> ${info.signo || 'N/A'}</p>
-                        <p><strong>Grado:</strong> ${info.grado || 'N/A'}°</p>
-                        <p><strong>Elemento:</strong> ${getElementName(
-                            ELEMENTOS[info.signo]
-                        )}</p>
-                    `;
+                            <p><strong>Signo:</strong> ${info.signo}</p>
+                            <p><strong>Grado:</strong> ${info.grado.toFixed(
+                                2
+                            )}°</p>
+                        `;
                         container.appendChild(card);
+                    });
+                }
+
+                // Información adicional del Sol, Luna y Ascendente
+                if (data.sol_info || data.luna_info || data.ascendente_info) {
+                    const additionalInfo = document.createElement('div');
+                    additionalInfo.className = 'planet-card';
+                    additionalInfo.style.gridColumn = 'span 2';
+
+                    let infoHtml = '<h3>Información Adicional</h3>';
+
+                    if (data.sol_info) {
+                        infoHtml += `
+                            <p><strong>Sol:</strong> ${data.planetas.sol.signo} - 
+                            Elemento: ${data.sol_info.elemento}, Cualidad: ${data.sol_info.cualidad}</p>
+                        `;
                     }
+
+                    if (data.luna_info) {
+                        infoHtml += `
+                            <p><strong>Luna:</strong> ${data.planetas.luna.signo} - 
+                            Elemento: ${data.luna_info.elemento}, Cualidad: ${data.luna_info.cualidad}</p>
+                        `;
+                    }
+
+                    if (data.ascendente_info) {
+                        infoHtml += `
+                            <p><strong>Ascendente:</strong> ${data.ascendente} - 
+                            Elemento: ${data.ascendente_info.elemento}, Cualidad: ${data.ascendente_info.cualidad}</p>
+                        `;
+                    }
+
+                    additionalInfo.innerHTML = infoHtml;
+                    container.appendChild(additionalInfo);
                 }
             }
 
-            function getElementName(elemento) {
-                const names = {
-                    fire: 'Fuego',
-                    earth: 'Tierra',
-                    air: 'Aire',
-                    water: 'Agua',
-                };
-                return names[elemento] || elemento;
+            function displayPlanetPositions(data) {
+                const container = document.getElementById('planetPositions');
+                if (!data.planetas) return;
+                let html = `<table class="astro-table"><thead><tr><th>Planeta</th><th>Símbolo</th><th>Signo</th><th>Grado</th><th>Casa</th></tr></thead><tbody>`;
+                Object.entries(data.planetas).forEach(([planeta, info]) => {
+                    // Buscar en qué casa está el planeta
+                    let casaNum = '';
+                    if (data.casas) {
+                        for (let i = 1; i <= 12; i++) {
+                            const c1 = data.casas[i.toString()].grado;
+                            const c2 =
+                                data.casas[i === 12 ? '1' : (i + 1).toString()]
+                                    .grado;
+                            let g = info.grado;
+                            // Ajuste para casas que cruzan 0° Aries
+                            if (c2 < c1) {
+                                if (g >= c1 || g < c2) casaNum = i;
+                            } else {
+                                if (g >= c1 && g < c2) casaNum = i;
+                            }
+                        }
+                    }
+                    html += `<tr><td>${PLANET_NAMES[planeta]}</td><td>${
+                        PLANET_SYMBOLS[planeta]
+                    }</td><td>${info.signo}</td><td>${info.grado.toFixed(
+                        2
+                    )}°</td><td>${casaNum}</td></tr>`;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            }
+
+            function displayHouseCusps(data) {
+                const container = document.getElementById('houseCusps');
+                if (!data.casas) return;
+                let html = `<table class="astro-table"><thead><tr><th>Casa</th><th>Signo</th><th>Grado</th></tr></thead><tbody>`;
+                for (let i = 1; i <= 12; i++) {
+                    const casa = data.casas[i.toString()];
+                    html += `<tr><td>${i}</td><td>${
+                        casa.signo
+                    }</td><td>${casa.grado.toFixed(2)}°</td></tr>`;
+                }
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            }
+
+            function displayAspectsTable(data) {
+                const container = document.getElementById('aspectsTable');
+                if (!data.aspectos) return;
+                let html = `<table class="astro-table"><thead><tr><th>Planeta 1</th><th>Aspecto</th><th>Planeta 2</th><th>Orbe</th></tr></thead><tbody>`;
+                data.aspectos.forEach((asp) => {
+                    html += `<tr><td>${PLANET_NAMES[asp.planeta1]} ${
+                        PLANET_SYMBOLS[asp.planeta1]
+                    }</td><td>${asp.aspecto}</td><td>${
+                        PLANET_NAMES[asp.planeta2]
+                    } ${PLANET_SYMBOLS[asp.planeta2]}</td><td>${
+                        asp.orbe
+                    }°</td></tr>`;
+                });
+                html += '</tbody></table>';
+                container.innerHTML = html;
             }
 
             function displayAspects(aspects) {
                 const container = document.getElementById('aspectsList');
                 container.innerHTML = '';
 
-                if (
-                    !aspects ||
-                    !Array.isArray(aspects) ||
-                    aspects.length === 0
-                ) {
+                if (aspects.length === 0) {
                     container.innerHTML =
                         '<p>No se encontraron aspectos significativos.</p>';
                     return;
                 }
 
-                aspects.forEach((aspect) => {
-                    if (aspect && aspect.planeta1 && aspect.planeta2) {
-                        const item = document.createElement('div');
-                        item.className = 'aspect-item';
-                        item.innerHTML = `
+                const aspectsHtml = aspects
+                    .map(
+                        (aspect) => `
+                    <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px;">
                         <strong>${PLANET_NAMES[aspect.planeta1]} ${
                             PLANET_SYMBOLS[aspect.planeta1]
                         } 
@@ -707,119 +1319,51 @@
                         ${PLANET_NAMES[aspect.planeta2]} ${
                             PLANET_SYMBOLS[aspect.planeta2]
                         }</strong>
-                        <br>Orbe: ${aspect.orbe}°
-                    `;
-                        container.appendChild(item);
-                    }
-                });
+                        <br>
+                        <small>Orbe: ${aspect.orbe}°</small>
+                    </div>
+                `
+                    )
+                    .join('');
+
+                container.innerHTML = aspectsHtml;
             }
 
             function displayBalanceElementos(balance) {
                 const container = document.getElementById('balanceElementos');
                 container.innerHTML = '';
 
-                if (!balance) {
-                    container.innerHTML =
-                        '<p>No hay información de balance disponible.</p>';
-                    return;
-                }
+                if (!balance) return;
 
                 // Resumen general
                 const summary = document.createElement('div');
                 summary.className = 'balance-summary';
                 summary.innerHTML = `
                     <h3>${balance.resumen}</h3>
-                    <p><strong>Estado:</strong> ${balance.balance_general}</p>
+                    <p><strong>Elemento dominante:</strong> ${balance.dominante}</p>
+                    <p><strong>Balance general:</strong> ${balance.balance_general}</p>
                 `;
                 container.appendChild(summary);
 
-                // Barras de progreso para cada elemento
-                const elementos = ['Fuego', 'Tierra', 'Aire', 'Agua'];
-                const elementClasses = ['fire', 'earth', 'air', 'water'];
-
-                elementos.forEach((elemento, index) => {
-                    const elementData = balance.elementos[elemento];
-                    if (elementData) {
-                        const barContainer = document.createElement('div');
-                        barContainer.className = 'element-bar';
-
-                        barContainer.innerHTML = `
-                            <div class="element-name">${elemento}</div>
-                            <div class="element-progress">
-                                <div class="element-fill ${elementClasses[index]}" style="width: ${elementData.porcentaje}%">
-                                    ${elementData.cantidad} planetas
-                                </div>
+                // Barras de elementos
+                Object.entries(balance.elementos).forEach(
+                    ([elemento, info]) => {
+                        const elementBar = document.createElement('div');
+                        elementBar.className = 'element-bar';
+                        const elementClass = getElementClass(
+                            elemento.toLowerCase()
+                        );
+                        elementBar.innerHTML = `
+                        <div class="element-name">${elemento}</div>
+                        <div class="element-progress">
+                            <div class="element-fill ${elementClass}" style="width: ${info.porcentaje}%">
+                                ${info.cantidad}
                             </div>
-                            <div class="element-stats">${elementData.porcentaje}%</div>
-                        `;
-
-                        container.appendChild(barContainer);
+                        </div>
+                        <div class="element-stats">${info.porcentaje}%</div>
+                    `;
+                        container.appendChild(elementBar);
                     }
-                });
-
-                // Interpretación del balance
-                const interpretation = document.createElement('div');
-                interpretation.className = 'balance-summary';
-                interpretation.innerHTML = `
-                    <h4>Interpretación del Balance:</h4>
-                    <p><strong>Elemento Dominante:</strong> ${
-                        balance.dominante
-                    }</p>
-                    <p>${getBalanceInterpretation(balance)}</p>
-                `;
-                container.appendChild(interpretation);
-            }
-
-            function getBalanceInterpretation(balance) {
-                const dominante = balance.dominante;
-                const balanceGeneral = balance.balance_general;
-
-                const interpretations = {
-                    Fuego: {
-                        'Muy Balanceado':
-                            'Tienes una distribución equilibrada de elementos, con una ligera tendencia hacia la acción, pasión y creatividad.',
-                        Balanceado:
-                            'Tu energía está bien distribuida, con un enfoque en la iniciativa y el entusiasmo.',
-                        'Poco Balanceado':
-                            'Tienes una tendencia marcada hacia la acción y la pasión, pero mantienes cierta diversidad.',
-                        Desbalanceado:
-                            'Tu carta está muy enfocada en la energía de fuego, lo que puede indicar mucha pasión y acción.',
-                    },
-                    Tierra: {
-                        'Muy Balanceado':
-                            'Tienes una distribución equilibrada con una ligera tendencia hacia la practicidad y estabilidad.',
-                        Balanceado:
-                            'Tu enfoque está bien distribuido, con tendencia hacia lo material y estructurado.',
-                        'Poco Balanceado':
-                            'Tienes una tendencia marcada hacia la practicidad y la estabilidad.',
-                        Desbalanceado:
-                            'Tu carta está muy enfocada en la energía de tierra, lo que indica mucha practicidad y estructura.',
-                    },
-                    Aire: {
-                        'Muy Balanceado':
-                            'Tienes una distribución equilibrada con una ligera tendencia hacia la comunicación e intelectualidad.',
-                        Balanceado:
-                            'Tu enfoque está bien distribuido, con tendencia hacia lo mental y social.',
-                        'Poco Balanceado':
-                            'Tienes una tendencia marcada hacia la comunicación y el pensamiento.',
-                        Desbalanceado:
-                            'Tu carta está muy enfocada en la energía de aire, lo que indica mucha actividad mental y social.',
-                    },
-                    Agua: {
-                        'Muy Balanceado':
-                            'Tienes una distribución equilibrada con una ligera tendencia hacia la intuición y emocionalidad.',
-                        Balanceado:
-                            'Tu enfoque está bien distribuido, con tendencia hacia lo emocional e intuitivo.',
-                        'Poco Balanceado':
-                            'Tienes una tendencia marcada hacia la intuición y las emociones.',
-                        Desbalanceado:
-                            'Tu carta está muy enfocada en la energía de agua, lo que indica mucha sensibilidad e intuición.',
-                    },
-                };
-
-                return (
-                    interpretations[dominante]?.[balanceGeneral] ||
-                    'Tu carta astral muestra una distribución única de elementos que refleja tu personalidad individual.'
                 );
             }
         </script>

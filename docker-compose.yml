@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+    astrology-api:
+        build: .
+        ports:
+            - '8000:8000'
+        environment:
+            - EPH_PATH=/app/ephe
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        volumes:
+            # Opcional: montar logs si quieres persistirlos
+            - ./logs:/app/logs
+            # Montar volumen para la caché de geocodificación
+            - ./data:/app/data

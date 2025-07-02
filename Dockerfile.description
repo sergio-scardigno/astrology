@@ -1,0 +1,55 @@
+# API de Astrología con Swiss Ephemeris
+
+Una API REST completa para cálculos astrológicos que utiliza Swiss Ephemeris para precisión astronómica.
+
+## Características
+
+- 🌟 **Cálculos precisos** usando Swiss Ephemeris
+- 📊 **Carta astral completa** con planetas, casas y aspectos
+- ⚖️ **Balance de elementos** automático
+- 🌐 **API REST** con FastAPI
+- 🎨 **Interfaz web** integrada
+- 🔍 **Health checks** incluidos
+- 🔒 **Seguridad** con usuario no-root
+
+## Uso Rápido
+
+```bash
+# Ejecutar la aplicación
+docker run -p 8000:8000 sergioscardigno82/astrology-api:latest
+
+# Acceder a la interfaz web
+open http://localhost:8000
+
+# Usar la API
+curl "http://localhost:8000/carta?anio=1990&mes=1&dia=1&hora=12&lat=40.4168&lon=-3.7038"
+```
+
+## Endpoints Disponibles
+
+- `GET /` - Interfaz web
+- `GET /health` - Health check
+- `GET /status` - Estado de la API
+- `GET /carta` - Generar carta astral
+
+## Parámetros de la API
+
+- `anio` (requerido): Año de nacimiento (1500-2100)
+- `mes` (requerido): Mes de nacimiento (1-12)
+- `dia` (requerido): Día de nacimiento (1-31)
+- `hora` (opcional): Hora de nacimiento (0-23), default: 12
+- `minuto` (opcional): Minuto de nacimiento (0-59), default: 0
+- `tz` (opcional): Zona horaria, default: 0
+- `lat` (opcional): Latitud, default: "0.0"
+- `lon` (opcional): Longitud, default: "0.0"
+
+## Tecnologías
+
+- **Backend:** FastAPI + Python 3.11
+- **Cálculos:** Swiss Ephemeris
+- **Frontend:** HTML + CSS + JavaScript
+- **Container:** Docker optimizado
+
+## Licencia
+
+MIT License 

@@ -2,3 +2,6 @@ fastapi
 uvicorn[standard]
 pyswisseph
 python-dotenv          # para leer variables de entorno (ruta efemérides)
+requests               # para llamadas HTTP a APIs de geocodificación
+timezonefinder
+pytz

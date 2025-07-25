@@ -844,6 +844,14 @@
                     'none';
             }
 
+            // Al cargar la página, poner -3 como valor por defecto en el campo tz si está vacío
+            window.addEventListener('DOMContentLoaded', () => {
+                const tzInput = document.getElementById('tz');
+                if (tzInput && !tzInput.value) {
+                    tzInput.value = '-3';
+                }
+            });
+
             document
                 .getElementById('birthForm')
                 .addEventListener('submit', async (e) => {
@@ -868,6 +876,13 @@
                     params.append('dia', formData.get('dia'));
                     params.append('hora', hora);
                     params.append('minuto', formData.get('minuto'));
+
+                    // --- Asegurarse de enviar tz ---
+                    let tz = formData.get('tz');
+                    if (!tz || tz.trim() === '') {
+                        tz = '-3';
+                    }
+                    params.append('tz', tz);
 
                     // Agregar ciudad si está seleccionada
                     if (selectedCity) {
@@ -921,6 +936,7 @@
                 document.getElementById('error').textContent = message;
             }
 
+            // En displayChart(data), mostrar la hora local, zona horaria y hora UTC
             function displayChart(data) {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('results').style.display = 'block';
@@ -949,6 +965,36 @@
                 if (typeof data.zona_horaria !== 'undefined') {
                     document.getElementById('tz').value =
                         data.zona_horaria + ' (UTC)';
+                }
+
+                // Mostrar hora local, zona horaria y hora UTC
+                let infoTiempo = '';
+                if (data.zona_horaria !== undefined && data.fecha_utc && data.hora_utc) {
+                    // Obtener hora local del formulario
+                    const anio = document.getElementById('anio').value;
+                    const mes = document.getElementById('mes').value;
+                    const dia = document.getElementById('dia').value;
+                    let hora = document.getElementById('hora').value;
+                    const ampm = document.getElementById('ampm').value;
+                    const minuto = document.getElementById('minuto').value;
+                    let hora24 = parseInt(hora, 10);
+                    if (ampm === 'pm' && hora24 < 12) hora24 += 12;
+                    if (ampm === 'am' && hora24 === 12) hora24 = 0;
+                    const horaLocalStr = `${dia.padStart(2,'0')}/${mes.padStart(2,'0')}/${anio} ${hora24.toString().padStart(2,'0')}:${minuto.padStart(2,'0')}:00 (${data.zona_horaria > 0 ? '+' : ''}${data.zona_horaria})`;
+                    infoTiempo = `<div class="astro-time-info" style="margin-bottom:10px;">
+                        <strong>Hora local ingresada:</strong> ${horaLocalStr}<br>
+                        <strong>Zona Horaria:</strong> UT ${data.zona_horaria > 0 ? '+' : ''}${data.zona_horaria}:00:00<br>
+                        <strong>Fecha UT:</strong> ${data.fecha_utc}<br>
+                        <strong>Hora UT:</strong> ${data.hora_utc}
+                    </div>`;
+                }
+                document.getElementById('astroTimeInfo')?.remove();
+                const resultsDiv = document.getElementById('results');
+                if (infoTiempo) {
+                    const div = document.createElement('div');
+                    div.id = 'astroTimeInfo';
+                    div.innerHTML = infoTiempo;
+                    resultsDiv.insertBefore(div, resultsDiv.children[1]);
                 }
 
                 drawChart(data);
@@ -1056,6 +1102,14 @@
                 }
 
                 // Dibujar casas (líneas radiales y etiquetas)
+                // --- MODIFICACIÓN: Invertir sentido antihorario y asegurar MC arriba ---
+                // Cambiar la fórmula del ángulo para casas y planetas:
+                // Antes: const angle = ((grado - 90) * Math.PI) / 180;
+                // Ahora:
+
+                // En drawChart, reemplaza donde se calcula 'angle' para casas y planetas por:
+
+                // --- Para casas ---
                 if (data.casas) {
                     for (let i = 1; i <= 12; i++) {
                         const casa = data.casas[i.toString()];
@@ -1063,7 +1117,8 @@
                             const grado = casa.grado;
                             const signo = casa.signo;
                             const signoSimbolo = SIGN_SYMBOLS[signo] || '';
-                            const angle = ((grado - 90) * Math.PI) / 180;
+                            // Invertir sentido y asegurar MC arriba
+                            const angle = ((-grado + 90) * Math.PI) / 180;
                             // Línea radial de casa
                             ctx.strokeStyle = '#ff9800';
                             ctx.lineWidth = 2.5;
@@ -1130,10 +1185,12 @@
                 }
 
                 // Dibujar planetas (símbolos grandes y claros)
+                // --- Para planetas ---
                 if (data.planetas) {
                     Object.entries(data.planetas).forEach(([planeta, info]) => {
                         const grado = info.grado;
-                        const angle = ((grado - 90) * Math.PI) / 180;
+                        // Invertir sentido y asegurar MC arriba
+                        const angle = ((-grado + 90) * Math.PI) / 180;
                         const x = centerX + planetRadius * Math.cos(angle);
                         const y = centerY + planetRadius * Math.sin(angle);
                         ctx.fillStyle = getElementColor(ELEMENTOS[info.signo]);
@@ -1366,6 +1423,40 @@
                     }
                 );
             }
+
+            // Función para actualizar la zona horaria automáticamente según lat/lon y fecha
+            async function actualizarZonaHoraria() {
+                const lat = document.getElementById('lat').value;
+                const lon = document.getElementById('lon').value;
+                const anio = document.getElementById('anio').value;
+                const mes = document.getElementById('mes').value;
+                const dia = document.getElementById('dia').value;
+                let hora = parseInt(document.getElementById('hora').value, 10);
+                const ampm = document.getElementById('ampm').value;
+                if (ampm === 'pm' && hora < 12) hora += 12;
+                if (ampm === 'am' && hora === 12) hora = 0;
+                const minuto = document.getElementById('minuto').value;
+                if (lat && lon && anio && mes && dia && hora >= 0 && minuto !== '') {
+                    try {
+                        const url = `/timezone?lat=${lat}&lon=${lon}&anio=${anio}&mes=${mes}&dia=${dia}&hora=${hora}&minuto=${minuto}`;
+                        const resp = await fetch(url);
+                        const data = await resp.json();
+                        if (data.offset !== undefined && !isNaN(data.offset)) {
+                            document.getElementById('tz').value = data.offset;
+                        }
+                    } catch (e) {
+                        // Si falla, no cambiar el valor
+                    }
+                }
+            }
+            // Detectar cambios en lat, lon, fecha y hora para actualizar zona horaria
+            ['lat','lon','anio','mes','dia','hora','ampm','minuto'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', actualizarZonaHoraria);
+                    el.addEventListener('blur', actualizarZonaHoraria);
+                }
+            });
         </script>
     </body>
 </html>

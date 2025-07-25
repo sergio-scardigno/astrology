@@ -197,8 +197,16 @@ async def carta(
                 tz_offset = -3
     
     # Generar carta astral
+    print(f"[DEBUG] Recibido: {anio}-{mes}-{dia} {hora}:{minuto} tz={tz_offset} lat={lat_float} lon={lon_float}")
     carta_result = get_chart(anio, mes, dia, hora, minuto, 0, tz_offset, lat_float, lon_float)
-    
+
+    # Calcular fecha y hora UTC para mostrar al usuario
+    from datetime import datetime, timedelta
+    dt_local = datetime(anio, mes, dia, hora, minuto)
+    dt_utc = dt_local + timedelta(hours=-tz_offset)
+    carta_result["fecha_utc"] = dt_utc.strftime("%d/%m/%Y")
+    carta_result["hora_utc"] = dt_utc.strftime("%H:%M:%S")
+
     # Agregar información de la ciudad si está disponible
     if ciudad_info:
         carta_result["ubicacion"] = {
@@ -214,6 +222,16 @@ async def carta(
             "latitud": lat_float,
             "longitud": lon_float
         }
-    
+
     carta_result["zona_horaria"] = tz_offset
     return carta_result
+
+@app.get("/timezone")
+def timezone(lat: float, lon: float, anio: int, mes: int, dia: int, hora: int = 12, minuto: int = 0):
+    """
+    Devuelve el offset horario (en horas) para una latitud, longitud y fecha/hora dadas.
+    """
+    from datetime import datetime
+    dt = datetime(anio, mes, dia, hora, minuto)
+    offset = get_timezone_offset(lat, lon, dt)
+    return {"offset": offset}

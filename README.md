@@ -1,62 +1,91 @@
 # Astrology API
 
-This is a web-based astrology application that provides various astrological calculations and data.
+Aplicación web de astrología que permite calcular cartas natales, posiciones planetarias, cúspides de casas y aspectos, con soporte para geocodificación y despliegue en Docker.
 
-## Features
+## Características
 
-*   Calculates planetary positions and house cusps.
-*   Provides data for different celestial bodies.
-*   Geocoding functionality to convert city names into coordinates.
-*   Docker support for easy deployment.
+- Calcula posiciones planetarias y cúspides de casas (Placidus).
+- Determina el ascendente, aspectos y balance de elementos.
+- Geocodificación automática de ciudades y cálculo de zona horaria según lugar y fecha.
+- Interfaz web moderna y API REST.
+- Despliegue sencillo con Docker y Docker Compose.
 
-## Installation
+## Instalación local
 
-1.  Clone the repository:
+1. Clona el repositorio:
     ```bash
-    git clone https://github.com/your-username/astrology-api.git
+    git clone https://github.com/tu-usuario/astrology-api.git
+    cd astrology-api
     ```
-2.  Install the dependencies:
+2. Instala las dependencias:
     ```bash
     pip install -r requirements.txt
     ```
+3. Ejecuta la aplicación:
+    ```bash
+    uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    ```
+4. Accede a la app en [http://localhost:8000](http://localhost:8000)
 
-## Usage
+## Uso con Docker
 
-To run the application locally, use the following command:
+### Docker Compose (recomendado)
 
 ```bash
-python main.py
+docker-compose up --build
 ```
 
-The application will be available at `http://localhost:5000`.
+- Accede a la app en [http://localhost:8000](http://localhost:8000)
 
-## Docker
-
-To build the Docker image, run the following command:
+### Docker manual
 
 ```bash
 docker build -t astrology-api .
+docker run -p 8000:8000 astrology-api
 ```
 
-To run the application in a Docker container:
+### Imagen en Docker Hub
 
 ```bash
-docker run -p 5000:5000 astrology-api
+docker run -p 8000:8000 sergioscardigno82/astrology-api:latest
 ```
 
-## Dependencies
+## Endpoints principales
 
-The required Python packages are listed in the `requirements.txt` file:
+- `/` — Interfaz web
+- `/carta` — Calcula la carta astral (GET, requiere parámetros de fecha, hora, lugar)
+- `/buscar_ciudades` — Busca ciudades por nombre
+- `/coordenadas` — Devuelve coordenadas de una ciudad
+- `/timezone` — Devuelve el offset horario para lat/lon y fecha
+- `/health` — Health check
+- `/status` — Estado de la API
 
-*   Flask
-*   pyswisseph
-*   geopy
+### Ejemplo de consulta a `/carta`
 
-## API Endpoints
+```
+/carta?anio=1982&mes=6&dia=6&hora=6&minuto=30&tz=-3&lat=-35.5667&lon=-58.0167
+```
 
-The following API endpoints are available:
+## Variables de entorno
 
-*   `/`: Returns the positions of the planets and house cusps for a given date, time, and location.
-*   `/api/planets`: Returns the positions of the planets for a given date and time.
-*   `/api/houses`: Returns the house cusps for a given date, time, and location.
-*   `/api/geocode`: Converts a city name into coordinates.
+- `EPH_PATH`: Ruta a los archivos de efemérides (por defecto: `/app/ephe`)
+
+## Dependencias principales
+
+- fastapi
+- uvicorn[standard]
+- pyswisseph
+- python-dotenv
+- requests
+- timezonefinder
+- pytz
+
+## Notas sobre la zona horaria y la hora local
+
+- **La hora de nacimiento debe ser la hora civil local** (la que figura en la partida de nacimiento).
+- La zona horaria se calcula automáticamente según la ciudad/latitud y la fecha, pero puedes ajustarla manualmente si lo deseas.
+- La app muestra la conversión a UTC para máxima transparencia.
+
+## Créditos y Licencia
+
+Desarrollado por Sergio Scardigno y colaboradores. Licencia MIT.
